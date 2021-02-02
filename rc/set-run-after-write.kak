@@ -12,6 +12,7 @@ define-command set-run-after-write -params 1 -docstring 'Set repl command to run
     remove-hooks buffer set-run-after-write
     hook -group set-run-after-write buffer BufWritePost .* %{
         repl-send-text %opt{auto_repl_command}
+        repl-send-newline
     }
 }
 
