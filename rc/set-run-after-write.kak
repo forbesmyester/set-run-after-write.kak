@@ -1,5 +1,5 @@
 define-command repl-send-newline -docstring 'Send a new line to a repl' %{
-    repl-send-text "
+    xmux-send-text "
 "
 }
 
@@ -11,7 +11,7 @@ define-command set-run-after-write -params 1 -docstring 'Set repl command to run
     declare-option str auto_repl_command %arg{1}
     remove-hooks buffer set-run-after-write
     hook -group set-run-after-write buffer BufWritePost .* %{
-        repl-send-text %opt{auto_repl_command}
+        xmux-send-text %opt{auto_repl_command}
         repl-send-newline
     }
 }
