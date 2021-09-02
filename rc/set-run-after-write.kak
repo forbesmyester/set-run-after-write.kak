@@ -1,19 +1,33 @@
-define-command repl-send-newline -docstring 'Send a new line to a repl' %{
-    xmux-send-text "
-"
+declare-option -hidden str xmux_run_command
+declare-option -hidden str xmux_run_name
+declare-option -hidden str xmux_run_loc
+
+define-command xmux-run-after-write-buffer -params 2 -docstring %{
+    usage: xmux-run-after-write XMUX_SESSION_NAME COMMAND
+    Runs xmux command after save. COMMAND = "" to disable
+    } %{
+
+    set-option buffer xmux_run_command %arg{2}
+    set-option buffer xmux_run_name "xmux-lines-%arg{1}"
+    evaluate-commands %sh{
+        test -z "${kak_opt_xmux_run_command}" && echo "unset-option buffer xmux_run_command"
+    }
+    xmux-repl %arg{1}
 }
 
-define-command unset-run-after-write -params 0 -docstring 'Unset repl command to run after write' %{
-    remove-hooks buffer set-run-after-write
+define-command xmux-run-after-write -params 2 -docstring %{
+    usage: xmux-run-after-write XMUX_SESSION_NAME COMMAND
+    Runs xmux command after save. COMMAND = "" to disable
+    } %{
+
+    set-option global xmux_run_command %arg{2}
+    set-option global xmux_run_name "xmux-lines-%arg{1}"
+    xmux-repl %arg{1}
 }
 
-define-command set-run-after-write -params 1 -docstring 'Set repl command to run after write' %{
-    declare-option str auto_repl_command %arg{1}
-    remove-hooks buffer set-run-after-write
-    hook -group set-run-after-write buffer BufWritePost .* %{
-        xmux-send-text %opt{auto_repl_command}
-        repl-send-newline
+hook -group xmux-set-run-after-write-hook global BufWritePost .* %{
+    evaluate-commands %sh{
+        test -n "${kak_opt_xmux_run_command}" && echo "%opt{xmux_run_name} %opt{xmux_run_command}"
     }
 }
-
 
